@@ -2,6 +2,7 @@
 import { Nav } from '../components/Nav'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { ProfCard } from '../components/ProfCard'
 
 type Proof = {
   id: string
@@ -60,6 +61,8 @@ export default function Page(){
   if (!ok) return (
     <main className="container">
       <Nav /><div style={{ height:12 }} />
+      <ProfCard subtitle="Accès réservé à la professeure" />
+      <div style={{ height:12 }} />
       <div className="card" style={{maxWidth:420}}>
         <h3>Accès Professeure</h3>
         <input
@@ -79,6 +82,9 @@ export default function Page(){
   return (
     <main className="container">
       <Nav /><div style={{ height:12 }} />
+      <ProfCard subtitle="Espace privé de correction et de suivi" />
+      <div style={{ height:12 }} />
+
       <div className="card">
         <h3>Preuves à corriger</h3>
         {!proofs.length && <p className="muted">Aucune preuve pour l’instant</p>}
