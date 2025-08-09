@@ -9,6 +9,7 @@ type Proof = {
   created_at: string
   note_prof: number | null
   comment_prof: string | null
+  matiere: string | null
 }
 
 export default function Page(){
@@ -36,9 +37,14 @@ export default function Page(){
 
   useEffect(()=>{ if (ok) load() },[ok])
 
+  function publicUrl(path:string){
+    const { data } = supabase.storage.from('proofs').getPublicUrl(path)
+    return data.publicUrl
+  }
+
   async function grade(id:string){
     const entry = notes[id]
-    if (!entry) return alert('Entre une note et/ou un commentaire')
+    if (!entry && typeof entry?.note !== 'number') return alert('Entre une note et/ou un commentaire')
     const { error } = await supabase
       .from('proofs')
       .update({ note_prof: entry.note, comment_prof: entry.com })
@@ -48,20 +54,21 @@ export default function Page(){
     alert('Note enregistrée')
   }
 
-  function publicUrl(path:string){
-    const { data } = supabase.storage.from('proofs').getPublicUrl(path)
-    return data.publicUrl
-  }
-
   if (!ok) return (
     <main className="container">
       <Nav /><div style={{ height:12 }} />
       <div className="card" style={{maxWidth:420}}>
         <h3>Accès Professeure</h3>
-        <input className="input" type="password" placeholder="Mot de passe"
-          value={pw} onChange={e=>setPw(e.target.value)} />
+        <input
+          className="input"
+          type="password"
+          placeholder="Mot de passe"
+          value={pw}
+          onChange={e=>setPw(e.target.value)}
+        />
         <div style={{height:8}}/>
         <button className="btn" onClick={enter}>Entrer</button>
+        <p className="muted" style={{marginTop:8}}>Indice (démo) : amelia123</p>
       </div>
     </main>
   )
@@ -75,19 +82,46 @@ export default function Page(){
 
         {proofs.map(p => (
           <div key={p.id} style={{borderTop:'1px solid #fde2e2', paddingTop:8, marginTop:8}}>
-            <div className="muted">{new Date(p.created_at).toLocaleString()}</div>
-            <div style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap'}}>
+            <div className="muted">
+              {new Date(p.created_at).toLocaleString()}
+              {p.matiere ? ` • ${p.matiere}` : ''}
+            </div>
+
+            <div style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap', marginTop:6}}>
               <a className="btn-outline" href={publicUrl(p.file_url)} target="_blank" rel="noreferrer">Voir</a>
-              <input className="input" style={{width:90}} type="number" min={0} max={20} placeholder="/20"
+
+              <input
+                className="input"
+                style={{width:90}}
+                type="number"
+                min={0}
+                max={20}
+                placeholder="/20"
                 value={notes[p.id]?.note ?? (p.note_prof ?? '')}
-                onChange={e=>setNotes(s=>({...s,[p.id]:{...(s[p.id]||{}), note:parseInt(e.target.value||'0')}}))} />
-              <input className="input" style={{minWidth:200}} placeholder="Commentaire"
+                onChange={e=>setNotes(s=>({
+                  ...s,
+                  [p.id]: { ...(s[p.id]||{}), note: parseInt(e.target.value||'0',10) }
+                }))}
+              />
+
+              <input
+                className="input"
+                style={{minWidth:220}}
+                placeholder="Commentaire"
                 value={notes[p.id]?.com ?? (p.comment_prof ?? '')}
-                onChange={e=>setNotes(s=>({...s,[p.id]:{...(s[p.id]||{}), com:e.target.value}}))} />
+                onChange={e=>setNotes(s=>({
+                  ...s,
+                  [p.id]: { ...(s[p.id]||{}), com: e.target.value }
+                }))}
+              />
+
               <button className="btn" onClick={()=>grade(p.id)}>Noter</button>
             </div>
+
             {typeof p.note_prof==='number' && (
-              <div className="muted">Déjà noté: {p.note_prof}/20 — {p.comment_prof || ''}</div>
+              <div className="muted" style={{marginTop:4}}>
+                Déjà noté: {p.note_prof}/20 {p.comment_prof ? `— ${p.comment_prof}` : ''}
+              </div>
             )}
           </div>
         ))}
