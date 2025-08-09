@@ -16,7 +16,7 @@ export default function Page(){
   const [pw,setPw] = useState('')
   const [ok,setOk] = useState(false)
   const [proofs,setProofs] = useState<Proof[]>([])
-  const [notes, setNotes] = useState<Record<string,{note:number,com:string}>>({})
+  const [notes, setNotes] = useState<Record<string,{ note?: number; com?: string }>>({})
 
   useEffect(()=>{ const s = sessionStorage.getItem('prof_ok'); setOk(s==='1') },[])
 
@@ -43,11 +43,14 @@ export default function Page(){
   }
 
   async function grade(id:string){
-    const entry = notes[id]
-    if (!entry && typeof entry?.note !== 'number') return alert('Entre une note et/ou un commentaire')
+    const entry = notes[id] as { note?: number; com?: string } | undefined
+    if (!entry || typeof entry.note !== 'number') {
+      alert('Entre une note numérique /20 (et optionnellement un commentaire)')
+      return
+    }
     const { error } = await supabase
       .from('proofs')
-      .update({ note_prof: entry.note, comment_prof: entry.com })
+      .update({ note_prof: entry.note, comment_prof: entry.com ?? null })
       .eq('id', id)
     if (error) return alert(error.message)
     await load()
