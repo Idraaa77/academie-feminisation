@@ -15,7 +15,6 @@ const DAILY = [
 export default function Page(){
   const [done, setDone] = useState<Record<string, boolean>>({})
   const [file,setFile] = useState<File|null>(null)
-  const today = new Date().toISOString().slice(0,10)
 
   useEffect(()=>{ setDone(JSON.parse(localStorage.getItem('ex_done')||'{}')) },[])
   useEffect(()=>{
