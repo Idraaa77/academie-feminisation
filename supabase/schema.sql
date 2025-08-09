@@ -1,4 +1,26 @@
--- Tables
+--- =========================
+-- RESET COMPLET (DANGEREUX)
+-- =========================
+drop table if exists public.outfits cascade;
+drop table if exists public.clothes cascade;
+drop table if exists public.bulletins cascade;
+drop table if exists public.exam_results cascade;
+drop table if exists public.exams cascade;
+drop table if exists public.syllabus cascade;
+drop table if exists public.messages cascade;
+drop table if exists public.proofs cascade;
+drop table if exists public.exercise_logs cascade;
+drop table if exists public.exercises cascade;
+drop table if exists public.users cascade;
+
+-- Extensions utiles (UUID)
+create extension if not exists "pgcrypto";
+
+-- =========================
+-- (RE)CRÉATION DES TABLES
+-- =========================
+
+-- 1) Utilisateurs
 create table public.users (
   id uuid primary key default gen_random_uuid(),
   email text unique,
@@ -6,6 +28,7 @@ create table public.users (
   created_at timestamptz default now()
 );
 
+-- 2) Exercices (catalogue)
 create table public.exercises (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -13,16 +36,29 @@ create table public.exercises (
   created_at timestamptz default now()
 );
 
+-- 3) Journal des exercices cochés
+create table public.exercise_logs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.users(id) on delete cascade,
+  exercise_id uuid references public.exercises(id) on delete set null,
+  day date not null,
+  done boolean not null default false,
+  created_at timestamptz default now(),
+  unique (user_id, exercise_id, day)
+);
+
+-- 4) Preuves (uploads)
 create table public.proofs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.users(id) on delete cascade,
-  exercise_id uuid references public.exercises(id),
+  exercise_id uuid references public.exercises(id) on delete set null,
   file_url text,
   note_prof int check (note_prof between 0 and 20),
   comment_prof text,
   created_at timestamptz default now()
 );
 
+-- 5) Messages (prof ↔ élève)
 create table public.messages (
   id uuid primary key default gen_random_uuid(),
   from_user uuid references public.users(id),
@@ -31,9 +67,10 @@ create table public.messages (
   created_at timestamptz default now()
 );
 
+-- 6) Dressing
 create table public.clothes (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references public.users(id),
+  user_id uuid references public.users(id) on delete cascade,
   type text,
   color text,
   photo_url text,
@@ -41,14 +78,16 @@ create table public.clothes (
   created_at timestamptz default now()
 );
 
+-- 7) Tenues
 create table public.outfits (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references public.users(id),
+  user_id uuid references public.users(id) on delete cascade,
   date date not null,
   item_ids uuid[],
   created_at timestamptz default now()
 );
 
+-- 8) Syllabus (programme)
 create table public.syllabus (
   id uuid primary key default gen_random_uuid(),
   month int not null check (month between 1 and 12),
@@ -57,14 +96,16 @@ create table public.syllabus (
   description text not null
 );
 
+-- 9) Examens
 create table public.exams (
   id uuid primary key default gen_random_uuid(),
   syllabus_id uuid references public.syllabus(id) on delete cascade,
   title text not null,
   questions jsonb not null,
-  kind text not null default 'quiz' -- quiz or practical
+  kind text not null default 'quiz' -- 'quiz' | 'practical'
 );
 
+-- 10) Résultats d’examens
 create table public.exam_results (
   id uuid primary key default gen_random_uuid(),
   exam_id uuid references public.exams(id) on delete cascade,
@@ -73,6 +114,7 @@ create table public.exam_results (
   taken_at timestamptz default now()
 );
 
+-- 11) Bulletins mensuels
 create table public.bulletins (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.users(id) on delete cascade,
@@ -82,22 +124,33 @@ create table public.bulletins (
   created_at timestamptz default now()
 );
 
--- RLS (enable and simple policies; refine in prod)
-alter table public.users enable row level security;
-alter table public.proofs enable row level security;
-alter table public.messages enable row level security;
-alter table public.clothes enable row level security;
-alter table public.outfits enable row level security;
-alter table public.exam_results enable row level security;
-alter table public.bulletins enable row level security;
+-- =========================
+-- RLS (démo, permissif)
+-- =========================
+alter table public.users          enable row level security;
+alter table public.exercises      enable row level security;
+alter table public.exercise_logs  enable row level security;
+alter table public.proofs         enable row level security;
+alter table public.messages       enable row level security;
+alter table public.clothes        enable row level security;
+alter table public.outfits        enable row level security;
+alter table public.syllabus       enable row level security;
+alter table public.exams          enable row level security;
+alter table public.exam_results   enable row level security;
+alter table public.bulletins      enable row level security;
 
--- Policies (placeholder; replace with auth.uid() based rules when using Supabase Auth)
-create policy users_read on public.users for select using (true);
-create policy users_insert on public.users for insert with check (true);
+-- Policies permissives pour la démo (à durcir plus tard avec auth.uid())
+create policy users_select     on public.users         for select using (true);
+create policy users_insert     on public.users         for insert with check (true);
 
-create policy proofs_own_read on public.proofs for select using (true);
-create policy proofs_insert on public.proofs for insert with check (true);
-create policy proofs_update_prof on public.proofs for update using (true);
+create policy exercises_rw     on public.exercises     for all    using (true) with check (true);
+create policy exercise_logs_rw on public.exercise_logs for all    using (true) with check (true);
+create policy proofs_rw        on public.proofs        for all    using (true) with check (true);
+create policy messages_rw      on public.messages      for all    using (true) with check (true);
+create policy clothes_rw       on public.clothes       for all    using (true) with check (true);
+create policy outfits_rw       on public.outfits       for all    using (true) with check (true);
+create policy syllabus_rw      on public.syllabus      for all    using (true) with check (true);
+create policy exams_rw         on public.exams         for all    using (true) with check (true);
+create policy exam_results_rw  on public.exam_results  for all    using (true) with check (true);
+create policy bulletins_rw     on public.bulletins     for all    using (true) with check (true);
 
-create policy messages_read on public.messages for select using (true);
-create policy messages_write on public.messages for insert with check (true);
