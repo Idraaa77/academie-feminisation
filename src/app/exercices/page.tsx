@@ -26,23 +26,20 @@ export default function Page(){
 
   async function uploadProof(exId:string, matiere:string){
     if (!file) return alert('Choisis un fichier')
-    const path = `${crypto.randomUUID()}-${file.name}`
+    const safeBase = file.name.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9.\-_]/g,'-').toLowerCase()
+    const path = `${crypto.randomUUID()}-${safeBase}`
     const { data, error } = await supabase.storage.from('proofs').upload(path, file)
     if (error) return alert(error.message)
-    await supabase.from('proofs').insert({
-      user_id: null, exercise_id: null,
-      file_url: data.path, matiere
-    })
-    alert('Preuve envoyée – Mlle Amélia pourra la noter')
-    setFile(null)
+    await supabase.from('proofs').insert({ user_id: null, exercise_id: null, file_url: data.path, matiere })
+    alert('Preuve envoyée – Mlle Amélia pourra la noter'); setFile(null)
   }
 
   return (
     <main className="container">
       <Nav />
-      <div style={{ height: 12 }} />
-      <ProfCard subtitle="Focalise-toi aujourd’hui sur la résonance et la posture. Tu vas briller ✨" />
-      <div style={{ height: 12 }} />
+      <div style={{height:12}}/>
+      <ProfCard size="lg" subtitle="Exécute les exercices, envoie tes preuves, je te note ensuite." />
+      <div style={{height:12}}/>
 
       <div className="card">
         <h2>Exercices du jour</h2>

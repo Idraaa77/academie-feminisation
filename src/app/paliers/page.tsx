@@ -1,11 +1,15 @@
 'use client'
 import { Nav } from '../components/Nav'
 import { LEVELS } from '@/lib/levels'
+import { ProfCard } from '../components/ProfCard'
 
 export default function Page(){
   return (
     <main className="container">
       <Nav /><div style={{height:12}}/>
+      <ProfCard size="lg" subtitle="Ton chemin : départ garçon → vibes Sabrina Carpenter ✨" />
+      <div style={{height:12}}/>
+
       <div className="card">
         <h2>Paliers vers “Sabrina Carpenter”</h2>
         {LEVELS.map((lv,i)=>(

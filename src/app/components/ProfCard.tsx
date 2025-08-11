@@ -1,47 +1,30 @@
 'use client'
 import Image from 'next/image'
-import { useState } from 'react'
-// Import statique depuis /public (chemin relatif depuis ce fichier)
-import ameliaPic from '../../../public/amelia.jpg'
+
+type Size = 'sm'|'md'|'lg'
 
 export function ProfCard({
   title = "Mademoiselle Amélia",
   subtitle = "Ta prof personnelle ✨",
-  small = false
-}: { title?: string; subtitle?: string; small?: boolean }) {
-  const size = small ? 48 : 72
-  const [broken, setBroken] = useState(false)
-
+  size = 'lg',
+}: { title?: string; subtitle?: string; size?: Size }) {
+  const px = size==='lg' ? 120 : size==='md' ? 72 : 48
   return (
     <div style={{
-      display:'flex', alignItems:'center', gap:12,
+      display:'flex', alignItems:'center', gap:16,
       background:'#fff', border:'1px solid #fecdd3',
-      borderRadius:16, padding:12
+      borderRadius:20, padding:16, boxShadow: '0 10px 20px rgba(236,72,153,.10)'
     }}>
       <div style={{
-        width:size, height:size, borderRadius:'50%', overflow:'hidden',
-        border:'2px solid #fb7185', flex:'0 0 auto', display:'grid', placeItems:'center'
+        width:px, height:px, borderRadius:'50%', overflow:'hidden',
+        border:'3px solid #fb7185', flex:'0 0 auto'
       }}>
-        {!broken ? (
-          <Image
-            src={ameliaPic} alt="Mlle Amélia" width={size} height={size}
-            onError={()=>setBroken(true)}
-            priority
-            style={{ objectFit:'cover', width:size, height:size }}
-          />
-        ) : (
-          // Fallback si l'image casse
-          <div style={{
-            width:size, height:size, display:'grid', placeItems:'center',
-            background:'#ffe4e6', color:'#db2777', fontWeight:700
-          }}>
-            A
-          </div>
-        )}
+        <Image src="/amelia.jpg" alt="Mlle Amélia" width={px} height={px}
+               priority style={{objectFit:'cover', width:px, height:px}}/>
       </div>
       <div>
-        <div style={{fontWeight:700}}>{title}</div>
-        <div className="muted">{subtitle}</div>
+        <div style={{fontWeight:800, fontSize: size==='lg'? 22 : 18}}>Mademoiselle Amélia</div>
+        <div className="muted" style={{fontSize: size==='lg'? 14 : 12}}>{subtitle}</div>
       </div>
     </div>
   )

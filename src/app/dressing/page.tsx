@@ -2,6 +2,8 @@
 import { Nav } from '../components/Nav'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { ProfCard } from '../components/ProfCard'
+
 
 type Cat =
   | 'haut' | 'bas' | 'chaussures' | 'accessoire'
@@ -158,6 +160,9 @@ export default function Page(){
   return (
     <main className="container">
       <Nav /><div style={{height:12}}/>
+<ProfCard size="lg" subtitle="Ajoute tes habits et je te propose une tenue (samedi aléatoire) !" />
+<div style={{height:12}}/>
+
 
       {/* Formulaire d’ajout */}
       <div className="card">

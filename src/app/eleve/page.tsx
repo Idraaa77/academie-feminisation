@@ -2,6 +2,7 @@
 import { Nav } from '../components/Nav'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { ProfCard } from '../components/ProfCard'
 
 type Msg = { id:string; body:string; created_at:string; from_user:string|null; to_user:string|null }
 
@@ -25,6 +26,9 @@ export default function Page(){
   return (
     <main className="container">
       <Nav /><div style={{height:12}}/>
+      <ProfCard size="lg" subtitle="Mes messages et annonces pour toi apparaissent ici." />
+      <div style={{height:12}}/>
+
       <div className="card">
         <h2>Messages — Élève</h2>
         <div style={{display:'grid', gap:8}}>
@@ -34,7 +38,7 @@ export default function Page(){
           </div>
           {!msgs.length ? <p className="muted">Aucun message.</p> :
             msgs.map(m=>(
-              <div key={m.id} className="card" style={{padding:'10px', borderColor:'#fbcfe8'}}>
+              <div key={m.id} className="card" style={{padding:10, borderColor:'#fbcfe8'}}>
                 <div className="muted">{new Date(m.created_at).toLocaleString()}</div>
                 <div>{m.body}</div>
               </div>

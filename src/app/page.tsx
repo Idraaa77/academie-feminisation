@@ -16,15 +16,13 @@ export default function Home(){
   return (
     <main className="container">
       <Nav />
-      <div style={{ height: 12 }} />
+      <div style={{height:12}}/>
+      <ProfCard size="lg" subtitle="Bienvenue ! Voici ta progression et les missions du jour 💗" />
+      <div style={{height:12}}/>
 
       <div className="card">
         <h1>Académie de Féminisation</h1>
         <p className="muted">Girly + <b>Sabrina Carpenter</b> vibes ✨</p>
-
-        <div style={{margin:'12px 0'}}>
-          <ProfCard subtitle="Voici les consignes du jour. Donne le meilleur de toi 💗" small />
-        </div>
 
         <div className="badge">{LEVELS[level].name}</div>
         <p className="muted">{LEVELS[level].motto}</p>

@@ -2,6 +2,7 @@
 import { Nav } from '../components/Nav'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { ProfCard } from '../components/ProfCard'
 
 type Row = { id:string; month:number; week:number; title:string; description:string }
 type Exam = { id:string; syllabus_id:string; title:string; kind:string }
@@ -14,8 +15,7 @@ export default function Page(){
   useEffect(()=>{ load() },[mois])
 
   async function load(){
-    const { data } = await supabase.from('syllabus')
-      .select('*').eq('month', mois).order('week', { ascending:true })
+    const { data } = await supabase.from('syllabus').select('*').eq('month', mois).order('week', { ascending:true })
     setRows((data||[]) as Row[])
     if (data?.length){
       const ids = data.map(d=>d.id)
@@ -28,6 +28,9 @@ export default function Page(){
   return (
     <main className="container">
       <Nav /><div style={{height:12}}/>
+      <ProfCard size="lg" subtitle="Voici le programme par semaines et l’examen de fin de module." />
+      <div style={{height:12}}/>
+
       <div className="card">
         <h2>Syllabus</h2>
         <div style={{display:'flex', gap:8, flexWrap:'wrap', marginBottom:8}}>
