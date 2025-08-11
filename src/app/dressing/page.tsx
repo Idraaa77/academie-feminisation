@@ -124,19 +124,21 @@ export default function Page(){
   async function saveOutfit(){
     if (!look) return
     setSaving(true)
-    const payload = DISPLAY_ORDER
-      .map(cat => {
-        const it = look[cat]
-        if (!it) return null
-        return { cat, id: it.id, nom: it.nom || null, image_url: it.image_url }
-      })
-      .filter(Boolean) as OutfitRow['items']
+const payload = DISPLAY_ORDER
+  .map(cat => {
+    const it = look[cat]
+    if (!it) return null
+    return { cat, id: it.id, nom: it.nom || null, image_url: it.image_url }
+  })
+  .filter(Boolean)
 
-    const { error } = await supabase.from('outfits').insert({
-      user_id: null, items: payload, note: null
-    })
+await supabase.from('outfits').insert({
+  user_id: null,
+  items: payload,   // 👈 bien “items”
+  note: null
+})
+
     setSaving(false)
-    if (error) return alert(error.message)
     alert('Tenue enregistrée ✨')
     loadOutfits()
   }
