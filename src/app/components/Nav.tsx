@@ -1,6 +1,5 @@
 'use client'
 import { usePathname, useRouter } from 'next/navigation'
-
 const tabs = [
   ['/', 'Accueil'],
   ['/exercices', 'Exercices'],
@@ -13,13 +12,19 @@ const tabs = [
   ['/paliers', 'Paliers'],
 ] as const
 
-export function Nav() {
-  const pathname = usePathname()
-  const router = useRouter()
+export function Nav(){
+  const pathname = usePathname(); const router = useRouter()
   return (
-    <div className="tabs" style={{gridTemplateColumns: 'repeat(9, minmax(0,1fr))'}}>
+    <div className="tabs" role="tablist" aria-label="Navigation principale">
       {tabs.map(([href,label]) => (
-        <button key={href} className={`tab ${pathname===href?'active':''}`} onClick={()=>router.push(href)}>{label}</button>
+        <button
+          key={href}
+          className={`tab ${pathname===href?'active':''}`}
+          onClick={()=>router.push(href)}
+          aria-current={pathname===href?'page':undefined}
+        >
+          {label}
+        </button>
       ))}
     </div>
   )
