@@ -16,8 +16,13 @@ type Proof = {
 export default function Page(){
   const [pw,setPw] = useState('')
   const [ok,setOk] = useState(false)
+
+  // --- Preuves à noter ---
   const [proofs,setProofs] = useState<Proof[]>([])
   const [notes, setNotes] = useState<Record<string,{ note?: number; com?: string }>>({})
+
+  // --- Messagerie ---
+  const [msg, setMsg] = useState('')
 
   useEffect(()=>{ const s = sessionStorage.getItem('prof_ok'); setOk(s==='1') },[])
 
@@ -35,7 +40,6 @@ export default function Page(){
     if (error) { alert(error.message); return }
     setProofs((data || []) as Proof[])
   }
-
   useEffect(()=>{ if (ok) load() },[ok])
 
   function publicUrl(path:string){
@@ -56,6 +60,17 @@ export default function Page(){
     if (error) return alert(error.message)
     await load()
     alert('Note enregistrée')
+  }
+
+  async function sendMessage(){
+    const body = msg.trim()
+    if (!body) return
+    const { error } = await supabase.from('messages').insert({
+      from_user: null, to_user: null, body
+    })
+    if (error) { alert(error.message); return }
+    setMsg('')
+    alert('Message envoyé à l’onglet Élève')
   }
 
   if (!ok) return (
@@ -85,6 +100,22 @@ export default function Page(){
       <ProfCard subtitle="Espace privé de correction et de suivi" />
       <div style={{ height:12 }} />
 
+      {/* ---- Messagerie rapide ---- */}
+      <div className="card" style={{marginBottom:12}}>
+        <h3>Message à l’élève</h3>
+        <div style={{display:'flex', gap:8, flexWrap:'wrap'}}>
+          <input
+            className="input"
+            placeholder="Annonce, conseils, consignes…"
+            value={msg}
+            onChange={e=>setMsg(e.target.value)}
+          />
+          <button className="btn" onClick={sendMessage}>Envoyer</button>
+        </div>
+        <p className="muted" style={{marginTop:6}}>L’élève le verra dans l’onglet “Élève”.</p>
+      </div>
+
+      {/* ---- Preuves à corriger ---- */}
       <div className="card">
         <h3>Preuves à corriger</h3>
         {!proofs.length && <p className="muted">Aucune preuve pour l’instant</p>}
@@ -129,7 +160,7 @@ export default function Page(){
 
             {typeof p.note_prof==='number' && (
               <div className="muted" style={{marginTop:4}}>
-                Déjà noté: {p.note_prof}/20 {p.comment_prof ? `— ${p.comment_prof}` : ''}
+                Déjà noté: {p.note_prof}/20 {p.comment_prof ? `— {p.comment_prof}` : ''}
               </div>
             )}
           </div>
